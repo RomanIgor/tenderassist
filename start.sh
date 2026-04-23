@@ -1,7 +1,7 @@
 #!/bin/bash
 echo ""
 echo "╔══════════════════════════════════════════════╗"
-echo "║         TenderAI — 100% lokal               ║"
+echo "║         TenderAssist — 100% lokal               ║"
 echo "║  Kein Internet · Kein KI · DSGVO-konform    ║"
 echo "╚══════════════════════════════════════════════╝"
 echo ""

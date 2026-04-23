@@ -1,5 +1,5 @@
 """
-TenderAI — Angebots-PDF Generator
+TenderAssist — Angebots-PDF Generator
 Erstellt professionelle Angebotsschreiben lokal mit ReportLab.
 Kein Word, kein Cloud, kein Internet.
 """
@@ -277,7 +277,7 @@ def generate_offer_pdf(data: dict) -> str:
     story.append(Spacer(1, 6))
     story.append(Paragraph(
         "Albert Ziegler GmbH · HRB 13592 · Amtsgericht Kempten · USt-IdNr.: DE129274935 · "
-        "Erstellt mit TenderAI · 100% lokal",
+        "Erstellt mit TenderAssist · 100% lokal",
         s_footer))
 
     doc.build(story)

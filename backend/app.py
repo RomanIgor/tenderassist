@@ -1,5 +1,5 @@
 """
-TenderAI Backend — Flask API
+TenderAssist Backend — Flask API
 100% lokal, kein Internet, kein KI
 """
 
@@ -168,7 +168,7 @@ def get_tender(tid):
 if __name__ == "__main__":
     init_db()
     print("\n" + "="*50)
-    print("  TenderAI Backend — 100% lokal")
+    print("  TenderAssist Backend — 100% lokal")
     print("  http://localhost:5000")
     print("  Kein Internet · Kein KI · DSGVO-konform")
     print("="*50 + "\n")

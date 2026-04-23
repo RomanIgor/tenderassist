@@ -1,5 +1,5 @@
 """
-TenderAI Parser — 100% lokal, kein KI, kein Internet.
+TenderAssist Parser — 100% lokal, kein KI, kein Internet.
 Extrahiert technische Anforderungen aus Feuerwehr-Ausschreibungen.
 """
 

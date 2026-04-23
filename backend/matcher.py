@@ -1,5 +1,5 @@
 """
-TenderAI Matcher — Vergleich Ausschreibungsanforderungen vs. Ziegler-Katalog.
+TenderAssist Matcher — Vergleich Ausschreibungsanforderungen vs. Ziegler-Katalog.
 100% lokal, kein KI, kein Internet.
 """
 
