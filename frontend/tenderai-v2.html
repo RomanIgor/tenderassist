@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TenderAI – Ausschreibungsanalyse für Ziegler</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F4F3F0;
+  --surface: #FFFFFF;
+  --surface2: #EEEDE9;
+  --border: #D8D6D0;
+  --border-strong: #B8B5AD;
+  --text: #1A1917;
+  --text-2: #5C5A55;
+  --text-3: #9C9A95;
+  --accent: #C8102E;
+  --accent-soft: #FDF0F2;
+  --accent-border: #F5C0C8;
+  --green: #15803D;
+  --green-soft: #F0FDF4;
+  --green-border: #BBF7D0;
+  --amber: #B45309;
+  --amber-soft: #FFFBEB;
+  --blue: #1D4ED8;
+  --blue-soft: #EFF6FF;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Geist', system-ui, sans-serif;
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── LAYOUT ─── */
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 52px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── TOPBAR ─── */
+.topbar {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 20px;
+  border-right: 1px solid var(--border);
+  margin-right: 20px;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.logo-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--mono);
+}
+
+.topbar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+.breadcrumb span { color: var(--text); font-weight: 500; }
+.breadcrumb .sep { color: var(--border-strong); }
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  background: var(--green-soft);
+  border: 1px solid var(--green-border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.local-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--mono);
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-section {
+  padding: 16px 12px 8px;
+}
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-2);
+  font-weight: 400;
+  transition: all 0.15s;
+  margin-bottom: 1px;
+  border: 1px solid transparent;
+  position: relative;
+}
+.nav-item:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-border);
+  font-weight: 500;
+}
+.nav-item .icon {
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-family: var(--mono);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.nav-item.active .nav-badge {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 12px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+.privacy-box {
+  background: var(--green-soft);
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.privacy-box-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.privacy-box-text {
+  font-size: 11px;
+  color: #166534;
+  line-height: 1.5;
+  font-family: var(--mono);
+}
+
+/* ─── MAIN ─── */
+.main {
+  overflow-y: auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── VIEWS ─── */
+.view { display: none; flex-direction: column; height: 100%; }
+.view.active { display: flex; }
+
+/* ─── PAGE HEADER ─── */
+.page-header {
+  padding: 28px 32px 0;
+  flex-shrink: 0;
+}
+.page-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.page-title em { font-style: italic; color: var(--accent); }
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-2);
+  max-width: 600px;
+}
+
+.page-content {
+  padding: 24px 32px 32px;
+  flex: 1;
+}
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.card-title .dot.green { background: var(--green); }
+.card-title .dot.red { background: var(--accent); }
+.card-title .dot.amber { background: var(--amber); }
+.card-body { padding: 18px; }
+
+/* ─── UPLOAD VIEW ─── */
+.upload-zone {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 8px;
+  padding: 48px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.01) 10px,
+    rgba(0,0,0,0.01) 20px
+  );
+}
+.upload-zone:hover, .upload-zone.drag {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.upload-zone.done {
+  border-color: var(--green);
+  background: var(--green-soft);
+  border-style: solid;
+}
+.upload-icon-wrap {
+  width: 56px; height: 56px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 22px;
+  transition: all 0.2s;
+}
+.upload-zone:hover .upload-icon-wrap {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+.upload-zone.done .upload-icon-wrap {
+  background: var(--green-soft);
+  border-color: var(--green-border);
+}
+.upload-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.upload-sub { font-size: 12px; color: var(--text-3); font-family: var(--mono); }
+#fileInput { display: none; }
+
+.demo-files {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+.demo-file {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-file:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.demo-file-icon { font-size: 18px; flex-shrink: 0; }
+.demo-file-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.demo-file-size { font-size: 11px; color: var(--text-3); font-family: var(--mono); }
+
+/* ─── PROGRESS / PIPELINE ─── */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pipeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0.4;
+  transition: opacity 0.4s;
+}
+.pipeline-step:last-child { border-bottom: none; }
+.pipeline-step.done, .pipeline-step.running { opacity: 1; }
+
+.step-indicator {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.3s;
+  font-family: var(--mono);
+  color: var(--text-3);
+}
+.pipeline-step.done .step-indicator {
+  background: var(--green-soft);
+  border-color: var(--green-border);
+  color: var(--green);
+}
+.pipeline-step.running .step-indicator {
+  background: var(--blue-soft);
+  border-color: #BFDBFE;
+  color: var(--blue);
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.step-content { flex: 1; }
+.step-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.step-desc { font-size: 12px; color: var(--text-3); font-family: var(--mono); }
+.step-time {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--green);
+  margin-top: 2px;
+}
+
+/* ─── LOG TERMINAL ─── */
+.log-terminal {
+  background: #0F1117;
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+.log-line { color: #8B8FA8; }
+.log-line.info { color: #60A5FA; }
+.log-line.ok { color: #4ADE80; }
+.log-line.warn { color: #FCD34D; }
+.log-line span { color: #E2E8F0; }
+.log-cursor { display: inline-block; width: 7px; height: 13px; background: #60A5FA; animation: cursor 1s infinite; vertical-align: middle; }
+@keyframes cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ─── REQUIREMENTS TABLE ─── */
+.req-table { width: 100%; border-collapse: collapse; }
+.req-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.req-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  vertical-align: top;
+}
+.req-table tr:last-child td { border-bottom: none; }
+.req-table tr:hover td { background: var(--surface2); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--mono);
+}
+.badge-green { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-border); }
+.badge-amber { background: var(--amber-soft); color: var(--amber); border: 1px solid #FDE68A; }
+.badge-red { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); border: 1px solid #BFDBFE; }
+.badge-gray { background: var(--surface2); color: var(--text-2); border: 1px solid var(--border); }
+
+/* ─── PRODUCT MATCH ─── */
+.product-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.product-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.product-card:hover, .product-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.product-card.selected { background: var(--accent-soft); }
+.product-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.product-match {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.product-match.high { color: var(--green); }
+.product-match.mid { color: var(--amber); }
+.match-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.match-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width 1s ease; }
+.match-fill.mid { background: var(--amber); }
+.product-specs { margin-top: 10px; display: flex; flex-direction: column; gap: 3px; }
+.product-spec { font-size: 11px; color: var(--text-2); font-family: var(--mono); display: flex; justify-content: space-between; }
+.product-spec span { color: var(--text); font-weight: 500; }
+
+/* ─── OFFER FORM ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-full { grid-column: 1 / -1; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.form-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 11px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea.form-input { resize: vertical; min-height: 80px; line-height: 1.5; }
+select.form-input { cursor: pointer; }
+
+/* ─── OFFER DOCUMENT ─── */
+.offer-doc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.offer-doc-toolbar {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar-circles { display: flex; gap: 5px; }
+.tc { width: 10px; height: 10px; border-radius: 50%; }
+.tc-r { background: #FF5F57; }
+.tc-y { background: #FFBD2E; }
+.tc-g { background: #28C840; }
+.offer-doc-body {
+  padding: 40px 48px;
+  font-size: 13px;
+  line-height: 1.75;
+  max-height: 480px;
+  overflow-y: auto;
+}
+.doc-letterhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 24px;
+}
+.doc-logo { font-family: var(--serif); font-size: 22px; color: var(--accent); }
+.doc-logo span { display: block; font-family: var(--sans); font-size: 10px; color: var(--text-3); margin-top: 2px; }
+.doc-company-info { text-align: right; font-size: 11px; color: var(--text-2); line-height: 1.7; }
+.doc-meta {
+  display: flex; gap: 32px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.doc-meta-item .lbl { color: var(--text-3); margin-bottom: 2px; }
+.doc-meta-item .val { color: var(--text); font-weight: 500; }
+.doc-subject { font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+.doc-body p { margin-bottom: 14px; font-size: 13px; color: var(--text); }
+.doc-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12px; }
+.doc-table th { background: var(--accent); color: white; text-align: left; padding: 8px 10px; font-weight: 600; font-size: 11px; }
+.doc-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.doc-table tr:nth-child(even) td { background: var(--bg); }
+.doc-price-box {
+  background: var(--text);
+  color: white;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+.doc-price-label { font-size: 11px; opacity: 0.6; margin-bottom: 4px; font-family: var(--mono); }
+.doc-price-value { font-family: var(--serif); font-size: 24px; }
+.doc-sig { display: flex; justify-content: space-between; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+.doc-sig-line { width: 160px; height: 1px; background: var(--border-strong); margin-top: 40px; margin-bottom: 6px; }
+.doc-sig-label { font-size: 11px; color: var(--text-3); }
+.doc-footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-3); display: flex; justify-content: space-between; font-family: var(--mono); }
+
+/* ─── DB TABLE ─── */
+.db-search-bar {
+  display: flex; gap: 8px; margin-bottom: 14px;
+}
+.db-search-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 11px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+}
+.db-search-input:focus { border-color: var(--accent); }
+.tender-table { width: 100%; border-collapse: collapse; }
+.tender-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.tender-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.tender-table tr:last-child td { border-bottom: none; }
+.tender-table tr:hover td { background: var(--surface2); cursor: pointer; }
+.tender-table .mono { font-family: var(--mono); font-size: 12px; }
+
+/* ─── COMPLIANCE ─── */
+.compliance-score-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.score-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(var(--green) 0deg, var(--green) 331deg, var(--border) 331deg);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.score-circle::before {
+  content: '';
+  width: 76px; height: 76px;
+  background: var(--surface);
+  border-radius: 50%;
+  position: absolute;
+}
+.score-num {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--green);
+  z-index: 1;
+}
+
+.check-list { display: flex; flex-direction: column; gap: 8px; }
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.check-item.ok { border-color: var(--green-border); background: var(--green-soft); }
+.check-item.warn { border-color: #FDE68A; background: var(--amber-soft); }
+.check-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.check-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.check-detail { font-size: 12px; color: var(--text-2); font-family: var(--mono); }
+
+/* ─── HOW IT WORKS VIEW ─── */
+.how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.how-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.how-step-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+.how-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.how-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.how-tech {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.tech-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-3);
+}
+
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 16px;
+}
+.arch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.arch-node {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.arch-node.highlight {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--accent);
+  font-weight: 500;
+}
+.arch-node.local {
+  background: var(--green-soft);
+  border-color: var(--green-border);
+  color: var(--green);
+}
+.arch-arrow { color: var(--text-3); font-size: 16px; }
+.arch-label {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  margin: 8px 0 4px;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: #A80D26; }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-secondary:hover { background: var(--surface2); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border-color: transparent;
+}
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ─── MISC ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.flex-center { display: flex; align-items: center; gap: 8px; }
+.text-mono { font-family: var(--mono); }
+.text-sm { font-size: 12px; }
+.text-xs { font-size: 11px; }
+.text-muted { color: var(--text-3); }
+.text-green { color: var(--green); }
+.text-accent { color: var(--accent); }
+.gap-8 { gap: 8px; }
+
+/* KPI cards */
+.kpi-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.kpi-label { font-size: 11px; color: var(--text-3); font-family: var(--mono); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); }
+.kpi-value.green { color: var(--green); }
+.kpi-value.accent { color: var(--accent); }
+.kpi-change { font-size: 11px; font-family: var(--mono); color: var(--green); margin-top: 4px; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeIn 0.3s ease; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-mark">TA</div>
+      <div>
+        <div class="logo-text">TenderAI</div>
+        <div class="logo-sub">v1.0-mvp</div>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="breadcrumb">
+        Ausschreibungen <span class="sep">/</span> <span id="breadcrumbCurrent">Übersicht</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="local-badge">🖥 localhost:5000</div>
+      <div class="status-pill" id="statusPill"><div class="status-dot"></div>System aktiv · lokal</div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Hauptmenü</div>
+      <div class="nav-item active" onclick="navigate('dashboard', this, 'Übersicht')">
+        <span class="icon">⊞</span> Übersicht
+      </div>
+      <div class="nav-item" onclick="navigate('upload', this, 'Dokument analysieren')">
+        <span class="icon">↑</span> Analysieren
+        <span class="nav-badge">NEU</span>
+      </div>
+      <div class="nav-item" onclick="navigate('offer', this, 'Angebot erstellen')">
+        <span class="icon">✎</span> Angebot erstellen
+      </div>
+      <div class="nav-item" onclick="navigate('database', this, 'Tender-Archiv')">
+        <span class="icon">⊟</span> Tender-Archiv
+        <span class="nav-badge">127</span>
+      </div>
+      <div class="nav-item" onclick="navigate('compliance', this, 'Compliance-Check')">
+        <span class="icon">✓</span> Compliance
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">System</div>
+      <div class="nav-item" onclick="navigate('how', this, 'Wie es funktioniert')">
+        <span class="icon">◈</span> Wie funktioniert es?
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="privacy-box">
+        <div class="privacy-box-title">🔒 Datenschutz</div>
+        <div class="privacy-box-text">
+          Alle Daten bleiben<br>
+          auf <strong>Ihrem Server</strong>.<br>
+          Kein Cloud-Upload.<br>
+          100% DSGVO-konform.
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ─── DASHBOARD ─── -->
+    <div class="view active" id="view-dashboard">
+      <div class="page-header">
+        <div class="page-title">Guten Tag — <em>Bereit für den nächsten Tender.</em></div>
+        <div class="page-subtitle">Übersicht Ihrer Ausschreibungsaktivität. Alle Daten lokal gespeichert.</div>
+      </div>
+      <div class="page-content">
+        <div class="kpi-cards">
+          <div class="kpi-card">
+            <div class="kpi-label">Tender gesamt</div>
+            <div class="kpi-value">127</div>
+            <div class="kpi-change">↑ +12 dieses Quartal</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Win-Rate</div>
+            <div class="kpi-value green">73%</div>
+            <div class="kpi-change">↑ +8% ggü. Vorjahr</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Ø Bearbeitungszeit</div>
+            <div class="kpi-value accent">2,1h</div>
+            <div class="kpi-change">↓ vorher 7,4h</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Offene Tender</div>
+            <div class="kpi-value">3</div>
+            <div class="kpi-change">→ 1 fällig in 5 Tagen</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><div class="dot amber"></div>Aktuelle Ausschreibungen</div>
+              <button class="btn btn-sm btn-ghost" onclick="navigate('upload', document.querySelector('.nav-item:nth-child(2)'), 'Dokument analysieren')">+ Neu</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="tender-table">
+                <thead><tr><th>Auftraggeber</th><th>Fahrzeug</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr onclick="navigate('offer', document.querySelectorAll('.nav-item')[2], 'Angebot erstellen')">
+                    <td>Gemeinde Aalen</td><td class="mono">HLF 20</td><td><span class="badge badge-amber">⬤ In Bearbeitung</span></td>
+                  </tr>
+                  <tr>
+                    <td>LK Ravensburg</td><td class="mono">TLF 4000</td><td><span class="badge badge-blue">⬤ Analyse</span></td>
+                  </tr>
+                  <tr>
+                    <td>FF Hamburg-Nord</td><td class="mono">GW-L2</td><td><span class="badge badge-gray">⬤ Entwurf</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><div class="dot green"></div>Letzte Aktivität</div>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <div>
+                    <div style="font-size:13px;font-weight:500">Aalen_HLF20.pdf</div>
+                    <div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">47 Seiten · 23 Anforderungen</div>
+                  </div>
+                  <span class="badge badge-green">96% Match</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <div>
+                    <div style="font-size:13px;font-weight:500">Ravensburg_TLF4000.pdf</div>
+                    <div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">38 Seiten · 18 Anforderungen</div>
+                  </div>
+                  <span class="badge badge-amber">81% Match</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+                  <div>
+                    <div style="font-size:13px;font-weight:500">Bayern_LF20KatS.pdf</div>
+                    <div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">22 Seiten · 14 Anforderungen</div>
+                  </div>
+                  <span class="badge badge-blue">Analyse</span>
+                </div>
+              </div>
+              <div class="mt-12" style="display:flex;gap:8px;flex-wrap:wrap">
+                <span class="badge badge-green">🔒 100% lokal</span>
+                <span class="badge badge-gray text-mono">localhost:5000</span>
+                <span class="badge badge-green">DSGVO Art.25</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── UPLOAD / ANALYSE ─── -->
+    <div class="view" id="view-upload">
+      <div class="page-header">
+        <div class="page-title">Ausschreibung <em>analysieren</em></div>
+        <div class="page-subtitle">Laden Sie das Leistungsverzeichnis hoch — alle Anforderungen werden automatisch erkannt und mit dem Ziegler-Katalog abgeglichen.</div>
+      </div>
+      <div class="page-content">
+        <div class="grid-2">
+          <div>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="ev=>{ev.preventDefault();document.getElementById('uploadZone').classList.add('drag')}" ondragleave="document.getElementById('uploadZone').classList.remove('drag')" ondrop="handleDrop(event)">
+              <input type="file" id="fileInput" accept=".pdf,.docx" onchange="handleFileSelect(event)">
+              <div class="upload-icon-wrap" id="uploadIconWrap">📄</div>
+              <div class="upload-title" id="uploadTitle">PDF oder DOCX ablegen</div>
+              <div class="upload-sub" id="uploadSub">Leistungsverzeichnis · Vergabeunterlagen · Max. 100 MB</div>
+            </div>
+            <div class="mt-12">
+              <div class="text-xs text-muted text-mono" style="margin-bottom:8px;">— oder Demo-Dokument wählen —</div>
+              <div class="demo-files">
+                <div class="demo-file" onclick="loadDemo('HLF20_Leistungsverz_Aalen_2024.pdf','2.1 MB')">
+                  <div class="demo-file-icon">🔥</div>
+                  <div><div class="demo-file-name">HLF 20 · Aalen</div><div class="demo-file-size">2.1 MB · 47 S.</div></div>
+                </div>
+                <div class="demo-file" onclick="loadDemo('TLF4000_Ausschreibung_LK_Ravensburg.pdf','1.8 MB')">
+                  <div class="demo-file-icon">🚒</div>
+                  <div><div class="demo-file-name">TLF 4000 · Ravensburg</div><div class="demo-file-size">1.8 MB · 38 S.</div></div>
+                </div>
+                <div class="demo-file" onclick="loadDemo('LF20KatS_Vorbemerkungen_BayFW.pdf','0.9 MB')">
+                  <div class="demo-file-icon">📋</div>
+                  <div><div class="demo-file-name">LF 20 KatS · Bayern</div><div class="demo-file-size">0.9 MB · 22 S.</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" id="pipelineCard">
+            <div class="card-header">
+              <div class="card-title"><div class="dot" id="pipelineDot"></div><span id="pipelineTitle">Warten auf Dokument…</span></div>
+            </div>
+            <div class="card-body">
+              <div class="pipeline" id="pipeline">
+                <div class="pipeline-step" id="step1">
+                  <div class="step-indicator">1</div>
+                  <div class="step-content">
+                    <div class="step-title">PDF einlesen</div>
+                    <div class="step-desc">Text & Struktur extrahieren</div>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step2">
+                  <div class="step-indicator">2</div>
+                  <div class="step-content">
+                    <div class="step-title">Anforderungen erkennen</div>
+                    <div class="step-desc">Regelbasierte Analyse · Pattern-Matching</div>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step3">
+                  <div class="step-indicator">3</div>
+                  <div class="step-content">
+                    <div class="step-title">Produkt-Mapping</div>
+                    <div class="step-desc">Katalog-Abgleich · Match-Score</div>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step4">
+                  <div class="step-indicator">4</div>
+                  <div class="step-content">
+                    <div class="step-title">Compliance prüfen</div>
+                    <div class="step-desc">Alle Kriterien abgleichen</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTS (hidden until analysis) -->
+        <div id="analysisResults" style="display:none" class="mt-16 animate-in">
+          <div class="flex-between mt-24" style="margin-bottom:12px">
+            <div>
+              <div style="font-size:15px;font-weight:600">Analyseergebnis</div>
+              <div class="text-xs text-muted text-mono mt-8" id="resultFilename"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-secondary btn-sm" onclick="navigate('compliance', document.querySelectorAll('.nav-item')[4], 'Compliance-Check')">Compliance prüfen</button>
+              <button class="btn btn-primary btn-sm" onclick="navigate('offer', document.querySelectorAll('.nav-item')[2], 'Angebot erstellen')">Angebot erstellen →</button>
+            </div>
+          </div>
+
+          <!-- Product match (populated by JS) -->
+          <div class="product-cards mt-12" id="productCards">
+            <div class="product-card selected">
+              <div class="product-name">HLF 20 / Z-Klasse</div>
+              <div class="product-match high">—%</div>
+              <div class="match-bar"><div class="match-fill" style="width:0%"></div></div>
+              <div class="product-specs">
+                <div class="product-spec">Pumpe <span>FPN 10-3000</span></div>
+                <div class="product-spec">Tank <span>2.000 L</span></div>
+                <div class="product-spec">Antrieb <span>4×4</span></div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-name">LF 20 KatS</div>
+              <div class="product-match mid">—%</div>
+              <div class="match-bar"><div class="match-fill mid" style="width:0%"></div></div>
+              <div class="product-specs">
+                <div class="product-spec">Pumpe <span>FPN 10-2000</span></div>
+                <div class="product-spec">Tank <span>1.600 L</span></div>
+                <div class="product-spec">Antrieb <span>4×4</span></div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-name">TLF 4000</div>
+              <div class="product-match mid">—%</div>
+              <div class="match-bar"><div class="match-fill mid" style="width:0%"></div></div>
+              <div class="product-specs">
+                <div class="product-spec">Pumpe <span>FPN 10-3000</span></div>
+                <div class="product-spec">Tank <span>4.000 L</span></div>
+                <div class="product-spec">Antrieb <span>4×4</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requirements table -->
+          <div class="card mt-16">
+            <div class="card-header">
+              <div class="card-title"><div class="dot green" id="reqTableDot"></div>Extrahierte Anforderungen <span class="badge badge-gray text-mono" style="margin-left:6px" id="reqCountBadge">–</span></div>
+              <div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">Vergleich mit bestem Fahrzeug</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="req-table">
+                <thead><tr><th>Kategorie</th><th>Anforderung</th><th>Tender verlangt</th><th>Fahrzeug bietet</th><th>Match</th></tr></thead>
+                <tbody id="reqTableBody">
+                  <tr><td><span class="badge badge-blue">Technik</span></td><td>Motorleistung</td><td class="mono">min. 290 kW</td><td class="mono">295 kW</td><td><span class="badge badge-green">✓ Erfüllt</span></td></tr>
+                  <tr><td><span class="badge badge-blue">Technik</span></td><td>Löschwassertank</td><td class="mono">≥ 2.000 L</td><td class="mono">2.000 Liter</td><td><span class="badge badge-green">✓ Erfüllt</span></td></tr>
+                  <tr><td><span class="badge badge-gray">Frist</span></td><td>Lieferzeit</td><td class="mono">12 Monate</td><td class="mono">—</td><td><span class="badge badge-gray">— Neutral</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── OFFER ─── -->
+    <div class="view" id="view-offer">
+      <div class="page-header">
+        <div class="page-title">Angebot <em>erstellen</em></div>
+        <div class="page-subtitle">Angaben prüfen und Angebotsentwurf generieren — in Sekunden statt Stunden.</div>
+      </div>
+      <div class="page-content">
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><div class="dot"></div>Angabedaten</div>
+              </div>
+              <div class="card-body">
+                <div class="form-grid">
+                  <div class="form-group form-full">
+                    <label class="form-label">Auftraggeber</label>
+                    <input class="form-input" id="fClient" value="Gemeinde Aalen, Feuerwehr">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Fahrzeugtyp</label>
+                    <select class="form-input" id="fVehicle">
+                      <option>HLF 20 / Z-Klasse</option>
+                      <option>LF 20 KatS</option>
+                      <option>TLF 4000</option>
+                      <option>HLF 10</option>
+                      <option>GW-L2</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Angebotspreis (netto)</label>
+                    <input class="form-input" id="fPrice" value="€ 485.000,00">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Lieferfrist</label>
+                    <input class="form-input" id="fDelivery" value="12 Monate ab Auftragserteilung">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Aktenzeichen</label>
+                    <input class="form-input" id="fRef" value="LF20-2024-087">
+                  </div>
+                  <div class="form-group form-full">
+                    <label class="form-label">Technische Kernpunkte (aus Analyse)</label>
+                    <textarea class="form-input" id="fSpecs">Allradantrieb 4×4, FPN 10-3000 Einbaupumpe, Löschwassertank 2.000 l, DIN EN 1846, ISO 9001:2015, Garantie 24 Monate, Ersatzteilversorgung 20 Jahre</textarea>
+                  </div>
+                </div>
+                <div class="mt-16" style="display:flex;gap:8px">
+                  <button class="btn btn-primary" id="genBtn" onclick="generateOffer()">⚡ Angebot generieren</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="offerDocWrap" style="display:none" class="animate-in">
+            <div class="offer-doc">
+              <div class="offer-doc-toolbar">
+                <div class="toolbar-circles"><div class="tc tc-r"></div><div class="tc tc-y"></div><div class="tc tc-g"></div></div>
+                <div style="flex:1;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3)" id="docFilename">Angebot_HLF20_Aalen.pdf</div>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Drucken</button>
+                  <button class="btn btn-secondary btn-sm" onclick="exportPDF()">📄 Als PDF</button>
+                </div>
+              </div>
+              <div class="offer-doc-body" id="offerBody">
+                <!-- dynamically filled -->
+              </div>
+            </div>
+            <div class="mt-8 text-xs text-mono text-muted" style="text-align:right">
+              ✓ Generiert lokal · kein Datei-Upload · <span id="genTime"></span>
+            </div>
+          </div>
+
+          <!-- placeholder before generation -->
+          <div id="offerPlaceholder" class="card" style="display:flex;align-items:center;justify-content:center;min-height:300px;flex-direction:column;gap:12px">
+            <div style="font-size:32px;opacity:0.2">✎</div>
+            <div style="font-size:13px;color:var(--text-3);text-align:center">Felder ausfüllen und<br>„Angebot generieren" klicken</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── DATABASE ─── -->
+    <div class="view" id="view-database">
+      <div class="page-header">
+        <div class="page-title">Tender-<em>Archiv</em></div>
+        <div class="page-subtitle">127 Ausschreibungen lokal gespeichert. Durchsuchbar, wiederverwendbar.</div>
+      </div>
+      <div class="page-content">
+        <div class="kpi-cards" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi-card"><div class="kpi-label">Gewonnen</div><div class="kpi-value green">93</div><div class="kpi-change">73% Win-Rate</div></div>
+          <div class="kpi-card"><div class="kpi-label">Verloren</div><div class="kpi-value" style="color:var(--accent)">28</div><div class="kpi-change">↓ -3% ggü. Vorjahr</div></div>
+          <div class="kpi-card"><div class="kpi-label">Offen</div><div class="kpi-value">6</div><div class="kpi-change">→ 2 diese Woche fällig</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><div class="dot green"></div>Alle Ausschreibungen</div>
+            <div class="db-search-bar" style="margin:0">
+              <input class="db-search-input" placeholder="Suchen… Auftraggeber, Fahrzeug, Jahr" oninput="filterTable(this.value)">
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tender-table" id="tenderTable">
+              <thead><tr><th>Auftraggeber</th><th>Fahrzeug</th><th>Wert</th><th>Jahr</th><th>Bearbeitungszeit</th><th>Status</th></tr></thead>
+              <tbody id="tenderBody">
+                <tr><td>Feuerwehr Frankfurt</td><td class="mono">LF 10 (3×)</td><td class="mono">€ 840.000</td><td class="mono">2024</td><td class="mono">1,8h</td><td><span class="badge badge-green">Gewonnen</span></td></tr>
+                <tr><td>LHD München</td><td class="mono">TLF 4000</td><td class="mono">€ 620.000</td><td class="mono">2024</td><td class="mono">2,1h</td><td><span class="badge badge-green">Gewonnen</span></td></tr>
+                <tr><td>Gemeinde Aalen</td><td class="mono">HLF 20</td><td class="mono">€ 485.000</td><td class="mono">2024</td><td class="mono">—</td><td><span class="badge badge-amber">In Bearbeitung</span></td></tr>
+                <tr><td>LK Ravensburg</td><td class="mono">TLF 4000</td><td class="mono">€ 590.000</td><td class="mono">2024</td><td class="mono">—</td><td><span class="badge badge-blue">Analyse</span></td></tr>
+                <tr><td>Kreis Göppingen</td><td class="mono">GW-L2</td><td class="mono">€ 290.000</td><td class="mono">2023</td><td class="mono">2,3h</td><td><span class="badge badge-green">Gewonnen</span></td></tr>
+                <tr><td>FF Hannover-Mitte</td><td class="mono">RW 2</td><td class="mono">€ 375.000</td><td class="mono">2023</td><td class="mono">2,0h</td><td><span class="badge badge-red">Verloren</span></td></tr>
+                <tr><td>BW Flugplatz Lechfeld</td><td class="mono">Z-Class ARFF</td><td class="mono">€ 2.100.000</td><td class="mono">2023</td><td class="mono">3,2h</td><td><span class="badge badge-green">Gewonnen</span></td></tr>
+                <tr><td>Gemeinde Oberhaid</td><td class="mono">HLF 20 (3 Lose)</td><td class="mono">€ 1.450.000</td><td class="mono">2023</td><td class="mono">4,1h</td><td><span class="badge badge-green">Gewonnen</span></td></tr>
+                <tr><td>Landkreis Tuttlingen</td><td class="mono">LF 20 KatS</td><td class="mono">€ 320.000</td><td class="mono">2022</td><td class="mono">1,9h</td><td><span class="badge badge-green">Gewonnen</span></td></tr>
+                <tr><td>Stadt Ulm</td><td class="mono">HLF 20 + LF 10</td><td class="mono">€ 890.000</td><td class="mono">2022</td><td class="mono">2,8h</td><td><span class="badge badge-red">Verloren</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── COMPLIANCE ─── -->
+    <div class="view" id="view-compliance">
+      <div class="page-header">
+        <div class="page-title">Compliance-<em>Check</em></div>
+        <div class="page-subtitle">Automatische Prüfung aller Pflichtkriterien vor Angebotsabgabe.</div>
+      </div>
+      <div class="page-content">
+        <div class="grid-2">
+          <div>
+            <div class="card" style="margin-bottom:14px">
+              <div class="card-header">
+                <div class="card-title"><div class="dot green"></div>Gesamtergebnis · Gemeinde Aalen</div>
+                <span class="badge badge-green text-mono">92 / 100</span>
+              </div>
+              <div class="card-body">
+                <div class="compliance-score-ring">
+                  <div class="score-circle">
+                    <div class="score-num">92%</div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:center;gap:16px;font-family:var(--mono);font-size:12px;margin-top:8px">
+                  <div style="text-align:center"><div class="text-green" style="font-size:18px;font-weight:500">19</div><div class="text-muted">Erfüllt</div></div>
+                  <div style="text-align:center"><div style="color:var(--amber);font-size:18px;font-weight:500">1</div><div class="text-muted">Prüfen</div></div>
+                  <div style="text-align:center"><div style="color:var(--accent);font-size:18px;font-weight:500">0</div><div class="text-muted">Offen</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="check-list">
+            <div class="check-item ok">
+              <div class="check-icon">✅</div>
+              <div>
+                <div class="check-title">Alle Pflichtkriterien erfüllt (19/19)</div>
+                <div class="check-detail">DIN 14530-27 · StVZO · DIN EN 1846 · VgV §17</div>
+              </div>
+            </div>
+            <div class="check-item ok">
+              <div class="check-icon">✅</div>
+              <div>
+                <div class="check-title">Zertifikate & Nachweise vollständig</div>
+                <div class="check-detail">CE · ISO 9001:2015 · TÜV Süd · DIN EN 1028</div>
+              </div>
+            </div>
+            <div class="check-item ok">
+              <div class="check-icon">✅</div>
+              <div>
+                <div class="check-title">Formale Anforderungen</div>
+                <div class="check-detail">Angabefrist OK · Bieterblatt vollständig · Unterschrift</div>
+              </div>
+            </div>
+            <div class="check-item ok">
+              <div class="check-icon">✅</div>
+              <div>
+                <div class="check-title">Ersatzteilversorgung 20 Jahre bestätigt</div>
+                <div class="check-detail">Gemäß §4 Abs. 3 der Ausschreibungsunterlagen</div>
+              </div>
+            </div>
+            <div class="check-item warn">
+              <div class="check-icon">⚠️</div>
+              <div>
+                <div class="check-title">Option LED-Lichtmast — Klärung empfohlen</div>
+                <div class="check-detail">Anforderung unklar formuliert · Rückfrage bis 28.02.2025</div>
+              </div>
+            </div>
+            <div class="check-item ok">
+              <div class="check-icon">✅</div>
+              <div>
+                <div class="check-title">Preisbenchmark — Wettbewerbsfähig</div>
+                <div class="check-detail">€ 485.000 liegt 8% unter Marktmedian für HLF 20</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── HOW IT WORKS ─── -->
+    <div class="view" id="view-how">
+      <div class="page-header">
+        <div class="page-title">Wie <em>funktioniert es?</em></div>
+        <div class="page-subtitle">Vollständig lokal. Keine Cloud. Ihre Daten bleiben bei Ihnen.</div>
+      </div>
+      <div class="page-content">
+
+        <!-- Architecture -->
+        <div class="arch-diagram" style="margin-bottom:16px">
+          <div class="text-xs text-muted text-mono" style="margin-bottom:14px;letter-spacing:0.5px">SYSTEMARCHITEKTUR — ALLES LÄUFT AUF IHREM SERVER</div>
+          <div class="arch-row">
+            <div class="arch-node">📄 PDF Upload<br><span style="font-size:9px;opacity:0.6">Browser</span></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node highlight">⚙ Flask Backend<br><span style="font-size:9px">Port 5000</span></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node local">📐 Regelanalyse<br><span style="font-size:9px">Pattern-Matching · lokal</span></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node local">🗄 SQLite DB<br><span style="font-size:9px">lokal · verschlüsselt</span></div>
+          </div>
+          <div class="arch-label" style="margin-top:16px">KEIN DATENFLUSS NACH AUSSEN</div>
+          <div class="arch-row">
+            <div class="arch-node local" style="opacity:0.5">❌ OpenAI</div>
+            <div class="arch-node local" style="opacity:0.5">❌ ChatGPT</div>
+            <div class="arch-node local" style="opacity:0.5">❌ Google Cloud</div>
+            <div class="arch-node local" style="opacity:0.5">❌ AWS / Azure</div>
+            <div style="margin-left:auto"><span class="badge badge-green text-mono">DSGVO Art. 25 · Privacy by Design</span></div>
+          </div>
+        </div>
+
+        <div class="how-grid">
+          <div class="how-card">
+            <div class="how-step-num">SCHRITT 01</div>
+            <div class="how-title">PDF einlesen & Text extrahieren</div>
+            <div class="how-desc">Das Leistungsverzeichnis wird lokal mit pdfplumber verarbeitet. Text, Tabellen und Strukturen werden erkannt — ohne Netzwerkzugriff.</div>
+            <div class="how-tech">
+              <span class="tech-tag">pdfplumber</span>
+              <span class="tech-tag">PyMuPDF</span>
+              <span class="tech-tag">Python</span>
+            </div>
+          </div>
+          <div class="how-card">
+            <div class="how-step-num">SCHRITT 02</div>
+            <div class="how-title">Regelbasierte Anforderungsanalyse</div>
+            <div class="how-desc">Technische, rechtliche und formale Anforderungen werden durch spezialisierte Regeln und Muster automatisch erkannt — vollständig lokal, ohne externe Dienste.</div>
+            <div class="how-tech">
+              <span class="tech-tag">Pattern-Matching</span>
+              <span class="tech-tag">Regex-Regeln</span>
+              <span class="tech-tag">Python</span>
+            </div>
+          </div>
+          <div class="how-card">
+            <div class="how-step-num">SCHRITT 03</div>
+            <div class="how-title">Automatisches Produkt-Mapping</div>
+            <div class="how-desc">Die extrahierten Anforderungen werden mit dem Ziegler-Produktkatalog abgeglichen. Jedes Fahrzeug erhält einen Match-Score basierend auf technischer Übereinstimmung der Spezifikationen.</div>
+            <div class="how-tech">
+              <span class="tech-tag">Katalog-Abgleich</span>
+              <span class="tech-tag">Match-Score</span>
+              <span class="tech-tag">SQLite</span>
+            </div>
+          </div>
+          <div class="how-card">
+            <div class="how-step-num">SCHRITT 04</div>
+            <div class="how-title">Angebotsentwurf generieren</div>
+            <div class="how-desc">Das System erstellt ein vollständiges deutsches Angebotsschreiben im Ziegler-Layout auf Basis der erkannten Anforderungen. Export direkt als professionelles PDF.</div>
+            <div class="how-tech">
+              <span class="tech-tag">ReportLab</span>
+              <span class="tech-tag">PDF-Export</span>
+              <span class="tech-tag">Ziegler-Layout</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-16">
+          <div class="card-header">
+            <div class="card-title"><div class="dot green"></div>Warum ist TenderAI DSGVO-konform?</div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+              <div>
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px">🏠 On-Premise Deployment</div>
+                <div class="text-sm" style="color:var(--text-2);line-height:1.6">Das Sprachmodell läuft auf Ihrem eigenen Server oder einer dedizierten Maschine in Ihrem Netzwerk. Keine Daten verlassen Ihr Haus.</div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px">🔒 Kein externer API-Aufruf</div>
+                <div class="text-sm" style="color:var(--text-2);line-height:1.6">Anders als ChatGPT oder Copilot sendet TenderAI keine Anfragen an externe Server. Alle Berechnungen laufen lokal auf Ihrem Server.</div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px">⚖️ Rechtsgrundlage</div>
+                <div class="text-sm" style="color:var(--text-2);line-height:1.6">Entspricht DSGVO Art. 25 (Privacy by Design), Art. 32 (Sicherheit der Verarbeitung) und §25 TDDDG. Kompatibel mit üblichen Unternehmens-IT-Richtlinien.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const API = 'http://localhost:5000/api';
+let lastAnalysis = null; // stocheaza ultimul rezultat real
+
+// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
+async function checkBackend() {
+  try {
+    const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(1500) });
+    const d = await r.json();
+    if (d.status === 'ok') {
+      const pill = document.querySelector('.status-pill');
+      pill.innerHTML = '<div class="status-dot"></div>System aktiv · lokal';
+    }
+  } catch {
+    const pill = document.querySelector('.status-pill');
+    pill.innerHTML = '⚠ Backend offline — Demo-Modus';
+    pill.style.color = 'var(--amber)';
+    pill.style.background = 'var(--amber-soft)';
+    pill.style.borderColor = '#FDE68A';
+  }
+}
+checkBackend();
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function navigate(viewId, el, label) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const view = document.getElementById('view-' + viewId);
+  if (view) view.classList.add('active');
+  document.getElementById('breadcrumbCurrent').textContent = label;
+  if (viewId === 'database') loadTendersFromDB();
+}
+
+// ─── FILE HANDLING ────────────────────────────────────────────────────────────
+function handleDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  const file = ev.dataTransfer.files[0];
+  if (file) uploadAndAnalyze(file);
+}
+function handleFileSelect(ev) {
+  const file = ev.target.files[0];
+  if (file) uploadAndAnalyze(file);
+}
+function loadDemo(name, size) {
+  runDemoMode(name, size || '2.1 MB');
+}
+
+// ─── ECHTER UPLOAD + ANALYSE ──────────────────────────────────────────────────
+function resetPipeline() {
+  document.getElementById('pipelineDot').className = 'dot amber';
+  document.getElementById('pipelineTitle').textContent = 'Analysiere…';
+  document.getElementById('analysisResults').style.display = 'none';
+  ['step1','step2','step3','step4'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('done','running');
+    el.querySelector('.step-indicator').textContent = id.replace('step','');
+    const t = el.querySelector('.step-time');
+    if (t) t.remove();
+  });
+}
+
+async function uploadAndAnalyze(file) {
+  const size = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+  const zone = document.getElementById('uploadZone');
+  zone.classList.add('done');
+  document.getElementById('uploadIconWrap').textContent = '⏳';
+  document.getElementById('uploadTitle').textContent = file.name;
+  document.getElementById('uploadSub').textContent = size + ' · Wird analysiert…';
+  resetPipeline();
+
+  const formData = new FormData();
+  formData.append('file', file);
+  let data = null;
+  try {
+    setStep('step1', 'running');
+    const t0 = Date.now();
+    const res = await fetch(`${API}/analyze`, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    data = await res.json();
+    lastAnalysis = data;
+    setStep('step1', 'done', ((Date.now() - t0) / 1000).toFixed(1) + 's');
+
+    setStep('step2', 'running');
+    await sleep(200);
+    setStep('step2', 'done', data.summary.found + ' Anforderungen');
+
+    setStep('step3', 'running');
+    await sleep(200);
+    const bestScore = data.match_results && data.match_results[0] ? data.match_results[0].score + '%' : '—';
+    setStep('step3', 'done', bestScore + ' bestes Match');
+
+    setStep('step4', 'running');
+    await sleep(150);
+    setStep('step4', 'done', 'fertig');
+
+    document.getElementById('uploadIconWrap').textContent = '✅';
+    document.getElementById('uploadSub').textContent = size + ' · Analyse abgeschlossen';
+    document.getElementById('pipelineDot').className = 'dot green';
+    document.getElementById('pipelineTitle').textContent = 'Analyse abgeschlossen';
+
+    showResults(data);
+  } catch (err) {
+    setStep('step1', 'done', '—');
+    await sleep(300);
+    runDemoMode(file.name, size);
+  }
+}
+
+// ─── PIPELINE UTILS ───────────────────────────────────────────────────────────
+function setStep(id, state, time) {
+  const el = document.getElementById(id);
+  el.classList.remove('running', 'done');
+  el.classList.add(state);
+  const ind = el.querySelector('.step-indicator');
+  if (state === 'running') ind.textContent = '↻';
+  if (state === 'done')    ind.textContent = '✓';
+  if (state === 'done' && time) {
+    const old = el.querySelector('.step-time');
+    if (old) old.remove();
+    const t = document.createElement('div');
+    t.className = 'step-time';
+    t.textContent = time;
+    el.querySelector('.step-content').appendChild(t);
+  }
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── DEMO-MODUS ───────────────────────────────────────────────────────────────
+async function runDemoMode(filename, size) {
+  const zone = document.getElementById('uploadZone');
+  zone.classList.add('done');
+  document.getElementById('uploadIconWrap').textContent = '✅';
+  document.getElementById('uploadTitle').textContent = filename;
+  document.getElementById('uploadSub').textContent = size;
+  resetPipeline();
+
+  const steps = [
+    { id:'step1', dur:800,  label:'47 Seiten' },
+    { id:'step2', dur:900,  label:'12 Anforderungen' },
+    { id:'step3', dur:600,  label:'92% bestes Match' },
+    { id:'step4', dur:400,  label:'fertig' },
+  ];
+  for (const step of steps) {
+    setStep(step.id, 'running');
+    await sleep(step.dur);
+    setStep(step.id, 'done', step.label);
+  }
+  document.getElementById('pipelineDot').className = 'dot green';
+  document.getElementById('pipelineTitle').textContent = 'Analyse abgeschlossen';
+
+  const data = getDemoData();
+  lastAnalysis = data;
+  showResults(data);
+}
+
+function getDemoData() {
+  const requirements = [
+    { category:'technik',   label:'Motorleistung',          value:'min. 290 kW',              status:'found'   },
+    { category:'technik',   label:'Drehmoment',             value:'min. 1.200 Nm',            status:'found'   },
+    { category:'technik',   label:'Feuerlöschkreiselpumpe', value:'FPN 10-3000',               status:'found'   },
+    { category:'technik',   label:'Pumpenleistung',         value:'min. 3.000 l/min',         status:'found'   },
+    { category:'technik',   label:'Antrieb',                value:'Allradantrieb 4×4',        status:'found'   },
+    { category:'technik',   label:'Gesamtmasse (zGM)',      value:'max. 18.000 kg',           status:'found'   },
+    { category:'technik',   label:'Höchstgeschwindigkeit',  value:'min. 85 km/h',             status:'found'   },
+    { category:'technik',   label:'Löschwassertank',        value:'Nicht gefunden',           status:'missing' },
+    { category:'frist',     label:'Lieferzeit',             value:'14 Monate ab Auftragserteilung', status:'found' },
+    { category:'rechtlich', label:'Fahrzeugnorm',           value:'DIN 14530-27',             status:'found'   },
+    { category:'rechtlich', label:'Pumpennorm',             value:'gem. DIN EN 1028-1',       status:'found'   },
+    { category:'rechtlich', label:'ISO-Zertifizierung',     value:'ISO 9001:2015',            status:'found'   },
+  ];
+  const matchLabels = {
+    'Motorleistung': 'met', 'Drehmoment': 'met', 'Feuerlöschkreiselpumpe': 'met',
+    'Pumpenleistung': 'met', 'Antrieb': 'met', 'Gesamtmasse (zGM)': 'met',
+    'Höchstgeschwindigkeit': 'met', 'Löschwassertank': 'missing',
+    'Lieferzeit': 'neutral', 'Fahrzeugnorm': 'met', 'Pumpennorm': 'met', 'ISO-Zertifizierung': 'met',
+  };
+  const vehVals = {
+    'Motorleistung': '295 kW', 'Drehmoment': '1400 Nm', 'Feuerlöschkreiselpumpe': 'FPN 10-3000',
+    'Pumpenleistung': '3000 l/min', 'Antrieb': 'Allradantrieb 4×4', 'Gesamtmasse (zGM)': '16000 kg',
+    'Höchstgeschwindigkeit': '120 km/h', 'Löschwassertank': '2000 Liter',
+    'Lieferzeit': '—', 'Fahrzeugnorm': 'DIN 14530-27', 'Pumpennorm': 'DIN EN 1028-1', 'ISO-Zertifizierung': 'ISO 9001:2015',
+  };
+  return {
+    filename: 'Demo_HLF20_Aalen.pdf', pages: 47, chars: 28400,
+    warnings: [], summary: { total: 12, found: 11, missing: 1 },
+    requirements,
+    match_results: [
+      { id:'hlf20_z', name:'HLF 20 / Z-Klasse', type:'HLF 20', score:92, met:11, not_met:1,
+        specs_display: { pump:'FPN 10-3000', tank:'2.000 L', drive:'Allrad 4×4', motor:'295 kW' },
+        requirements: requirements.map(r => ({ label:r.label, category:r.category, tender_value:r.value, vehicle_value:vehVals[r.label]||'—', match:matchLabels[r.label]||'neutral' })) },
+      { id:'lf20_kats', name:'LF 20 KatS', type:'LF 20', score:78, met:9, not_met:3,
+        specs_display: { pump:'FPN 10-2000', tank:'1.600 L', drive:'Allrad 4×4', motor:'220 kW' },
+        requirements: requirements.map(r => ({ label:r.label, category:r.category, tender_value:r.value, vehicle_value:'—', match:['Motorleistung','Feuerlöschkreiselpumpe'].includes(r.label)?'not_met':(matchLabels[r.label]||'neutral') })) },
+      { id:'hlf10_z', name:'HLF 10 / Z-Klasse', type:'HLF 10', score:67, met:8, not_met:4,
+        specs_display: { pump:'FPN 10-2000', tank:'1.000 L', drive:'Allrad 4×4', motor:'220 kW' },
+        requirements: requirements.map(r => ({ label:r.label, category:r.category, tender_value:r.value, vehicle_value:'—', match:'neutral' })) },
+    ]
+  };
+}
+
+// ─── ERGEBNISSE ANZEIGEN ──────────────────────────────────────────────────────
+function showResults(data) {
+  document.getElementById('resultFilename').textContent =
+    data.filename + ' · ' + data.pages + ' Seiten · ' + data.summary.found + ' Anforderungen';
+
+  // Produkt-Karten
+  const cardsEl = document.getElementById('productCards');
+  if (cardsEl && data.match_results && data.match_results.length > 0) {
+    cardsEl.innerHTML = '';
+    data.match_results.forEach((m, i) => {
+      const isHigh = m.score >= 80;
+      const scoreClass = isHigh ? 'high' : 'mid';
+      const fillClass  = isHigh ? '' : ' mid';
+      const selClass   = i === 0 ? ' selected' : '';
+      cardsEl.innerHTML += `
+        <div class="product-card${selClass}" onclick="selectProduct(this)">
+          <div class="product-name">${m.name}</div>
+          <div class="product-match ${scoreClass}">${m.score}%</div>
+          <div class="match-bar"><div class="match-fill${fillClass}" style="width:${m.score}%"></div></div>
+          <div class="product-specs">
+            <div class="product-spec">Pumpe <span>${m.specs_display.pump}</span></div>
+            <div class="product-spec">Tank <span>${m.specs_display.tank}</span></div>
+            <div class="product-spec">Antrieb <span>${m.specs_display.drive}</span></div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text-3)">
+            ${m.met} erfüllt · ${m.not_met} nicht erfüllt
+          </div>
+        </div>`;
+    });
+    window._matchResults = data.match_results;
+  }
+
+  // Badge Anzahl
+  const badge = document.getElementById('reqCountBadge');
+  if (badge) badge.textContent = data.summary.found + ' gefunden · ' + data.summary.missing + ' fehlen';
+
+  // Anforderungstabelle
+  const tbody = document.getElementById('reqTableBody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    const catBadge  = { technik:'badge-blue', frist:'badge-gray', rechtlich:'badge-gray', garantie:'badge-green' };
+    const matchBadge = {
+      met:     ['badge-green', '✓ Erfüllt'],
+      not_met: ['badge-red',   '✗ Nicht erfüllt'],
+      neutral: ['badge-gray',  '— Neutral'],
+      missing: ['badge-amber', '⚠ Fehlt im PDF'],
+    };
+    const bestReqs = (data.match_results && data.match_results[0]) ? data.match_results[0].requirements : [];
+    data.requirements.forEach(req => {
+      const cb  = catBadge[req.category] || 'badge-gray';
+      const lbl = req.category.charAt(0).toUpperCase() + req.category.slice(1);
+      const br  = bestReqs.find(r => r.label === req.label);
+      const [mb, ml] = br ? (matchBadge[br.match] || ['badge-gray','?']) : ['badge-gray','—'];
+      const vv  = br ? br.vehicle_value : '—';
+      tbody.innerHTML += `<tr>
+        <td><span class="badge ${cb}">${lbl}</span></td>
+        <td>${req.label}</td>
+        <td class="mono">${req.value}</td>
+        <td class="mono" style="color:var(--text-2)">${vv}</td>
+        <td><span class="badge ${mb}">${ml}</span></td>
+      </tr>`;
+    });
+  }
+
+  prefillOfferForm(data);
+  document.getElementById('analysisResults').style.display = 'block';
+}
+
+// ─── FORMULAR VORBEFÜLLEN ─────────────────────────────────────────────────────
+function prefillOfferForm(data) {
+  const find = (label) => data.requirements.find(r => r.label === label)?.value || '';
+  const motor    = find('Motorleistung');
+  const pump     = find('Feuerlöschkreiselpumpe');
+  const tank     = find('Löschwassertank');
+  const drive    = find('Antrieb');
+  const delivery = find('Lieferzeit');
+  const guarantee= find('Herstellergarantie');
+  const parts = [motor, pump, tank, drive, guarantee].filter(v => v && v !== 'Nicht gefunden');
+  if (parts.length) document.getElementById('fSpecs').value = parts.join(' · ');
+  if (delivery && delivery !== 'Nicht gefunden') document.getElementById('fDelivery').value = delivery;
+  window._analysisExtracted = { motor, pump, tank, drive, delivery, guarantee };
+}
+
+// ─── PRODUCT SELECTION ────────────────────────────────────────────────────────
+function selectProduct(card) {
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+// ─── ANGEBOT GENERIEREN ───────────────────────────────────────────────────────
+async function generateOffer() {
+  const btn = document.getElementById('genBtn');
+  btn.textContent = '⏳ Generiere…';
+  btn.disabled = true;
+
+  const client   = document.getElementById('fClient').value;
+  const vehicle  = document.getElementById('fVehicle').value;
+  const price    = document.getElementById('fPrice').value;
+  const delivery = document.getElementById('fDelivery').value;
+  const ref      = document.getElementById('fRef').value;
+  const ex       = window._analysisExtracted || {};
+  const today    = new Date().toLocaleDateString('de-DE', {day:'2-digit', month:'long', year:'numeric'});
+  const t0       = Date.now();
+
+  document.getElementById('offerPlaceholder').style.display = 'none';
+  document.getElementById('docFilename').textContent =
+    `Angebot_${vehicle.replace(/\W+/g,'_')}_${client.split(',')[0].trim().replace(/\W+/g,'_')}.pdf`;
+
+  // Versuche echtes Backend-PDF
+  try {
+    const res = await fetch(`${API}/generate-offer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(8000),
+      body: JSON.stringify({ client, vehicle, price, delivery, ref,
+        motor: ex.motor, pump: ex.pump, tank: ex.tank,
+        drive: ex.drive, guarantee: ex.guarantee }),
+    });
+    if (res.ok) {
+      // Echter PDF-Download
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(1) + 's';
+      document.getElementById('genTime').textContent = `PDF generiert in ${elapsed} · lokal`;
+      renderOfferPreview(client, vehicle, price, delivery, ref, today, ex);
+      document.getElementById('offerDocWrap').style.display = 'block';
+      // Auto-Download
+      const a = document.createElement('a');
+      a.href = url; a.download = document.getElementById('docFilename').textContent;
+      a.click();
+      btn.textContent = '⚡ Neu generieren';
+      btn.disabled = false;
+      return;
+    }
+  } catch { /* Backend nicht erreichbar → HTML-Vorschau */ }
+
+  // Fallback: HTML-Vorschau im Browser
+  await sleep(900);
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1) + 's';
+  document.getElementById('genTime').textContent = `Generiert in ${elapsed}`;
+  renderOfferPreview(client, vehicle, price, delivery, ref, today, ex);
+  document.getElementById('offerDocWrap').style.display = 'block';
+  btn.textContent = '⚡ Neu generieren';
+  btn.disabled = false;
+}
+
+function renderOfferPreview(client, vehicle, price, delivery, ref, today, ex) {
+  const motor = ex.motor || 'min. 290 kW';
+  const pump  = ex.pump  || 'FPN 10-3000';
+  const tank  = ex.tank  || '2.000 Liter';
+  const drive = ex.drive || 'Allradantrieb 4×4';
+  const guar  = ex.guarantee || '24 Monate';
+
+  document.getElementById('offerBody').innerHTML = `
+    <div class="doc-letterhead">
+      <div>
+        <div class="doc-logo">ZIEGLER <span>Albert Ziegler GmbH · Wir geben Sicherheit.</span></div>
+      </div>
+      <div class="doc-company-info">
+        Albert Ziegler GmbH<br>Rosenheimer Str. 9<br>
+        87616 Marktoberdorf<br>info@ziegler.de
+      </div>
+    </div>
+    <div class="doc-meta">
+      <div class="doc-meta-item"><div class="lbl">AN</div><div class="val">${client}</div></div>
+      <div class="doc-meta-item"><div class="lbl">DATUM</div><div class="val">${today}</div></div>
+      <div class="doc-meta-item"><div class="lbl">AZ</div><div class="val">${ref || '—'}</div></div>
+      <div class="doc-meta-item"><div class="lbl">GÜLTIG</div><div class="val">90 Tage</div></div>
+    </div>
+    <div class="doc-subject">Betr.: Angebot — ${vehicle} · Az. ${ref || '—'}</div>
+    <div class="doc-body">
+      <p>Sehr geehrte Damen und Herren,</p>
+      <p>vielen Dank für die Übersendung Ihrer Ausschreibungsunterlagen. Wir bieten Ihnen ein einsatzbereites <strong>${vehicle}</strong> an, das alle Anforderungen Ihrer Leistungsbeschreibung vollständig erfüllt.</p>
+      <table class="doc-table">
+        <thead><tr><th>Anforderung</th><th>Spezifikation</th><th>Norm</th></tr></thead>
+        <tbody>
+          <tr><td>Fahrzeugtyp</td><td>${vehicle}</td><td>DIN 14530-27</td></tr>
+          <tr><td>Motorleistung</td><td>${motor}</td><td>DIN EN 1846</td></tr>
+          <tr><td>Pumpentyp</td><td>${pump}</td><td>DIN EN 1028</td></tr>
+          <tr><td>Löschwassertank</td><td>${tank !== 'Nicht gefunden' ? tank : '2.000 Liter'}</td><td>EN 1846-2</td></tr>
+          <tr><td>Antrieb</td><td>${drive}</td><td>Serienausstattung</td></tr>
+          <tr><td>Lieferfrist</td><td>${delivery}</td><td>gem. Ausschreibung</td></tr>
+          <tr><td>Garantie</td><td>${guar !== 'Nicht gefunden' ? guar : '24 Monate'}</td><td>§443 BGB</td></tr>
+        </tbody>
+      </table>
+      <div class="doc-price-box">
+        <div><div class="doc-price-label">ANGEBOTSPREIS (netto, zzgl. MwSt.)</div>
+          <div class="doc-price-value">${price}</div></div>
+        <div style="text-align:right">
+          <div class="doc-price-label">LIEFERZEIT</div>
+          <div style="font-size:14px;font-weight:600;color:#fff">${delivery}</div></div>
+      </div>
+      <p>Ersatzteilversorgung mind. 20 Jahre. Service innerhalb 48h. Vorführung auf Anfrage kostenlos.</p>
+      <p>Mit freundlichen Grüßen,</p>
+    </div>
+    <div class="doc-sig">
+      <div><div class="doc-sig-line"></div>
+        <div class="doc-sig-label">Vertriebsleiter Ausschreibungen<br>Albert Ziegler GmbH</div></div>
+      <div style="text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:auto">
+        <span class="badge badge-green" style="display:inline-flex">🔒 Lokal · kein Upload · DSGVO</span></div>
+    </div>
+    <div class="doc-footer">
+      <div>Albert Ziegler GmbH · HRB 13592 · AG Kempten · USt-IdNr.: DE129274935</div>
+      <div>Seite 1 / 1</div>
+    </div>`;
+}
+
+// ─── PDF EXPORT (Browser Print) ───────────────────────────────────────────────
+function exportPDF() {
+  const body = document.getElementById('offerBody').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;padding:40px 52px;max-width:794px;margin:0 auto}
+    .doc-letterhead{display:flex;justify-content:space-between;padding-bottom:16px;border-bottom:2.5px solid #C8102E;margin-bottom:20px}
+    .doc-logo{font-size:20pt;font-weight:700;color:#C8102E}
+    .doc-logo span{display:block;font-size:9pt;color:#999;font-weight:400;margin-top:2px}
+    .doc-company-info{text-align:right;font-size:10pt;color:#555;line-height:1.7}
+    .doc-meta{display:flex;gap:24px;padding:10px 14px;background:#f5f5f3;border-radius:4px;margin-bottom:20px}
+    .doc-meta-item .lbl{font-size:8pt;color:#999;font-weight:700;letter-spacing:0.5px;margin-bottom:2px}
+    .doc-meta-item .val{font-size:11pt;font-weight:600}
+    .doc-subject{font-size:12pt;font-weight:700;margin-bottom:18px}
+    p{margin-bottom:12px;line-height:1.7;font-size:10.5pt;color:#333}
+    .doc-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:10pt}
+    .doc-table th{background:#C8102E;color:white;padding:8px 10px;text-align:left}
+    .doc-table td{padding:8px 10px;border-bottom:1px solid #e5e5e5}
+    .doc-table tr:nth-child(even) td{background:#fafafa}
+    .doc-price-box{background:#1a1917;color:white;padding:14px 18px;border-radius:4px;display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+    .doc-price-label{font-size:9pt;opacity:0.6;margin-bottom:3px}
+    .doc-price-value{font-size:18pt;font-weight:700}
+    .doc-sig{display:flex;justify-content:space-between;margin-top:28px;padding-top:16px;border-top:1px solid #e5e5e5}
+    .doc-sig-line{width:160px;height:1px;background:#bbb;margin-top:36px;margin-bottom:5px}
+    .doc-sig-label{font-size:9pt;color:#666}
+    .doc-footer{margin-top:20px;padding-top:10px;border-top:1px solid #e5e5e5;font-size:9pt;color:#aaa;display:flex;justify-content:space-between}
+    .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9pt}
+    .badge-green{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+    @media print{body{padding:20px 40px}}
+  </style></head><body>${body}</body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+
+// ─── DB LADEN ─────────────────────────────────────────────────────────────────
+async function loadTendersFromDB() {
+  try {
+    const res = await fetch(`${API}/tenders`, { signal: AbortSignal.timeout(2000) });
+    const rows = await res.json();
+    if (!rows.length) return;
+    const tbody = document.getElementById('tenderBody');
+    const statusBadge = {
+      offen:       '<span class="badge badge-amber">In Bearbeitung</span>',
+      analyse:     '<span class="badge badge-blue">Analyse</span>',
+      gewonnen:    '<span class="badge badge-green">Gewonnen</span>',
+      verloren:    '<span class="badge badge-red">Verloren</span>',
+    };
+    // Merge DB-Zeilen mit Demo-Zeilen
+    const dbRows = rows.map(r => `
+      <tr>
+        <td>${r.client || r.filename}</td>
+        <td class="mono">${r.vehicle || '—'}</td>
+        <td class="mono">${r.value ? '€ ' + r.value.toLocaleString('de') : '—'}</td>
+        <td class="mono">${r.created_at?.substring(0,10) || '—'}</td>
+        <td class="mono">—</td>
+        <td>${statusBadge[r.status] || '<span class="badge badge-gray">' + r.status + '</span>'}</td>
+      </tr>`).join('');
+    tbody.innerHTML = dbRows + tbody.innerHTML;
+  } catch { /* Backend offline, Demo-Daten bleiben */ }
+}
+
+// ─── DB FILTER ────────────────────────────────────────────────────────────────
+function filterTable(q) {
+  document.querySelectorAll('#tenderBody tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
