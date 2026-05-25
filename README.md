@@ -4,7 +4,7 @@ Lokales Ausschreibungs-Assistenztool fuer Feuerwehrfahrzeuge.
 
 ## Zweck
 
-TenderAssist hilft dabei, Ausschreibungs-PDFs lokal zu verarbeiten, technische Anforderungen zu erkennen und gegen einen simulierten Ziegler-Fahrzeugkatalog abzugleichen.
+TenderAssist hilft dabei, Ausschreibungs-PDFs lokal zu verarbeiten, technische Anforderungen zu erkennen und gegen einen simulierten Fahrzeugkatalog abzugleichen.
 
 Keine Cloud-KI, kein externer API-Upload. Die Analyse basiert auf lokalen Regeln und Pattern-Matching.
 
